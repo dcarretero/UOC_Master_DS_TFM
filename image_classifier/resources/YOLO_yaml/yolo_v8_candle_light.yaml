@@ -1,0 +1,7 @@
+path: 'C:/Users/dcsj/Repositorios/UOC_TFM/image_classifier/resources/images/YOLO_format/imagenes_llamas_velas/images'
+train: 'train/'
+val: 'val/'
+
+# class names
+names:
+  0: 'candle_light'
