@@ -1,0 +1,7 @@
+path: 'C:/Users/dcsj/Repositorios/UOC_Master_DS_TFM/image_classifier/resources/images/YOLO_format/imagenes_rios_lagos2/images'
+train: 'train/'
+val: 'val/'
+
+# class names
+names:
+  0: 'water'

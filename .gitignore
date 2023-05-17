@@ -4,3 +4,5 @@ image_classifier/.idea
 image_classifier/.ipynb_checkpoints
 image_classifier/resources/images
 image_classifier/utils/__pycache__
+image_classifier/outputs
+image_classifier/resources

@@ -106,14 +106,14 @@ class ImageHelper:
                 title = textwrap.wrap(title, label_wrap_length)
                 title = "\n".join(title)
                 plt.title(title, fontsize=label_font_size);
-    def face_recognition(self,face_original_image_encodings,image_to_analyze_path):
+    def face_recognition(self,face_original_image_encodings,image_to_analyze_path,tolerance=0.6):
         # Localizamos las caras de la imagen a comparar
         image_to_compare = cv2.imread(image_to_analyze_path, cv2.IMREAD_COLOR)
         face_locations = fc.face_locations(image_to_compare)
         if face_locations != []:
             for face_location in face_locations:
                 face_image_compared_encodings = fc.face_encodings(image_to_compare, known_face_locations=[face_location])[0]
-                result = fc.compare_faces([face_image_compared_encodings], face_original_image_encodings)
+                result = fc.compare_faces([face_image_compared_encodings], face_original_image_encodings,tolerance)
                 if result[0] == True:
                     return (True,face_location[0],face_location[1],face_location[2],face_location[3])
         return (False,0,0,0,0)

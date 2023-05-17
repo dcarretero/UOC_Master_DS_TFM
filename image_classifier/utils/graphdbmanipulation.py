@@ -7,12 +7,21 @@ class ImageAnalyzed:
     def __init__(self, name):
         self.name = name
         self.objects = {}
+        self.max_confidence = {}
 
     def add_object(self, object_class):
         if object_class in self.objects.keys():
             self.objects[object_class] = self.objects[object_class] + 1
         else:
             self.objects[object_class] = 1
+    def add_confidence(self,object_class,confidence_value):
+        if object_class in self.max_confidence:
+            if self.max_confidence[object_class]<confidence_value:
+                self.max_confidence[object_class] = confidence_value
+        else:
+            self.max_confidence[object_class] = confidence_value
+
+
 
 
 class ImagesGraphDB:
@@ -30,7 +39,11 @@ class ImagesGraphDB:
                     for line in lines:
                         line= line.replace('\n','')
                         line_splitted = line.split(' ')
+                        # Se añade el tipo de objeto
                         imageAnalyzed.add_object(labels[int(line_splitted[0])])
+                        # Se añade
+                        if len(line_splitted)==6:
+                            imageAnalyzed.add_confidence(labels[int(line_splitted[0])],float(line_splitted[5]))
             self.images_analyzed.append(imageAnalyzed)
 
     def _load_graph_from_images_analyzed(self):
@@ -44,21 +57,55 @@ class ImagesGraphDB:
                     atrib_class_node = {}
                     atrib_class_node['type'] = 'object_class'
                     graph.add_nodes_from([(object_class,atrib_class_node)])
-                graph.add_edges_from([(image.name,object_class)],weight=image.objects[object_class])
-        self.graph = nx.compose(self.graph,graph) #fusiona el nuevo grafo con el existente
+                graph.add_edges_from([(image.name,object_class)],weight=image.objects[object_class],max_confidence=image.max_confidence[object_class])
+        self.graph = nx.compose(self.graph,graph) # fusiona el nuevo grafo con el existente
 
     # función que cruza dos listas y devuelve la intersección de elementos
     def _intersection(self,lst1, lst2):
         lst3 = [value for value in lst1 if value in lst2]
         return lst3
+
+    def get_images_containing_list_object_types_with_min_confidence(self, object_types, min_confidence):
+        nodes = nx.nodes(self.graph)  # devuelve un diccionario iterable
+        counter = 0
+        neighbors = []
+        neighbors_filtered_confidence = []
+        confidence = nx.get_edge_attributes(self.graph, 'max_confidence')
+        for object_type in object_types:
+            if counter == 0:
+                neighbors = list(nx.neighbors(self.graph, object_type))
+                for neighbor in neighbors:
+                    if (neighbor,object_type) in confidence.keys():
+                        key = (neighbor,object_type)
+                    else:
+                        key = (object_type, neighbor)
+                    max_confidence = confidence[key]
+                    if max_confidence>=min_confidence[counter]:
+                        neighbors_filtered_confidence.append(neighbor)
+            else:
+                neighbors= list(nx.neighbors(self.graph, object_type))
+                neighbors_filtered_confidence_aux = []
+                for neighbor in neighbors:
+                    if (neighbor,object_type) in confidence.keys():
+                        key = (neighbor,object_type)
+                    else:
+                        key = (object_type, neighbor)
+                    max_confidence = confidence[key]
+                    if max_confidence>=min_confidence[counter]:
+                        neighbors_filtered_confidence_aux.append(neighbor)
+                neighbors_filtered_confidence = self._intersection(neighbors_filtered_confidence, neighbors_filtered_confidence_aux)
+            counter += 1
+        return neighbors_filtered_confidence
+
     def get_images_containing_list_object_types(self,object_types):
         nodes = nx.nodes(self.graph)  # devuelve un diccionario iterable
         counter=0
-        neighbors=[]
+        confidence = nx.get_edge_attributes(self.graph,'max_confidence')
         for node in nodes:
             if node in object_types:
                 if counter==0:
                     neighbors = list(nx.neighbors(self.graph, node))
+
                 else:
                     neighbors= self._intersection(neighbors,list(nx.neighbors(self.graph, node)))
                 counter+=1

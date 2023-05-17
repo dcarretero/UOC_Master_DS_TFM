@@ -1,4 +1,4 @@
-path: 'C:/Users/dcsj/Repositorios/UOC_TFM/image_classifier/resources/images/YOLO_format/imagenes_llamas_velas/images'
+path: 'C:/Users/dcsj/Repositorios/UOC_Master_DS_TFM/image_classifier/resources/images/YOLO_format/imagenes_llamas_velas/images'
 train: 'train/'
 val: 'val/'
 
