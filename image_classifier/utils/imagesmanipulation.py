@@ -138,12 +138,12 @@ class ImageHelper:
                 latitude = gps_data.get('Latitude',None)
                 longitude = gps_data.get('Longitude',None)
                 if (latitude is None and longitude is None):
-                    city =  'unknown'
-                    postcode = 'unknown'
-                    state_district = 'unknown'
-                    state = 'unknown'
-                    country = 'unknown'
-                    distance_km =None
+                    city =  'unknown_city'
+                    postcode = 'unknown_postcode'
+                    province = 'unknown_state_district'
+                    state = 'unknown_state'
+                    country = 'unknown_country'
+                    distance_km =-1
                 else:
                     params ={
                         'format':'geojson',
@@ -153,11 +153,10 @@ class ImageHelper:
                     resp = requests.get("https://nominatim.openstreetmap.org/reverse", params=params)
                     respjson = resp.json()
                     address = respjson['features'][0]['properties']['address']
-                    city = address.get('city','unknown')
-                    postcode = address.get('postcode','unknown')
-                    state_district = address.get('state_district','unknown')
-                    state = address.get('state','unknown')
-                    country = address.get('country','unknown')
+                    city = address.get('city',address.get('village','unknown_city'))
+                    postcode = address.get('postcode','unknown_postcode')
+                    province = address.get('state_district',address.get('province',address.get('state','unknown_province')))
+                    country = address.get('country','unknown_country')
                     distance_km = h3.point_dist((residence_latitude,residence_longitude),(latitude,longitude),unit='km')
 
                 with open(os.path.join(images_path,entry), 'rb') as src:
@@ -167,12 +166,12 @@ class ImageHelper:
                     year = date.year
                     month = date.month
                     day = date.day
-                data_record = [entry,latitude,longitude,city,postcode,state_district,state,country,distance_km,datestring,day,month,year]
+                data_record = [entry,latitude,longitude,city,postcode,province,country,distance_km,datestring,day,month,year]
                 geo_dates_data.append(data_record)
             except Exception as e:
                 print(f"Error en {entry} : {e}")
-        df_geo_dates_data = pd.DataFrame(geo_dates_data, columns=['filename','latitude','longitude','city','postcode','state_district',
-                                                    'state','country','distance_km','datestring','day','month','year'])
+        df_geo_dates_data = pd.DataFrame(geo_dates_data, columns=['filename','latitude','longitude','city','postcode','province',
+                                                   'country','distance_km','datestring','day','month','year'])
 
         return df_geo_dates_data
 

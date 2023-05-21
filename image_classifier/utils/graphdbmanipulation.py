@@ -44,7 +44,7 @@ class ImagesGraphDB:
                         # Se añade
                         if len(line_splitted)==6:
                             imageAnalyzed.add_confidence(labels[int(line_splitted[0])],float(line_splitted[5]))
-            self.images_analyzed.append(imageAnalyzed)
+                    self.images_analyzed.append(imageAnalyzed)
 
     def _load_graph_from_images_analyzed(self):
         graph = nx.Graph()
@@ -105,12 +105,32 @@ class ImagesGraphDB:
             if node in object_types:
                 if counter==0:
                     neighbors = list(nx.neighbors(self.graph, node))
-
                 else:
                     neighbors= self._intersection(neighbors,list(nx.neighbors(self.graph, node)))
                 counter+=1
         return neighbors
-
+    def get_images_distance_gt(self,distance):
+        images = []
+        nodes = nx.nodes(self.graph)
+        for node in nodes:
+            if self.get_attribute_value_node(node,'type')=='image_filename':
+                if float(self.get_attribute_value_node(node,'distance_km'))>=distance:
+                    images.append(node)
+        return images
+    def get_neighbours_by_type_of_node_list(self,node_list,node_type,neighbour_type):
+        df = pd.DataFrame()
+        neighbours_list_filtered = []
+        node_list_filtered = []
+        for node in node_list:
+            neighbours = self.get_neighbours(node)
+            for neighbour in neighbours:
+                type = self.get_attribute_value_node(neighbour,'type')
+                if type == neighbour_type:
+                    node_list_filtered.append(node)
+                    neighbours_list_filtered.append(neighbour)
+        df[node_type] = node_list_filtered
+        df[neighbour_type] = neighbours_list_filtered
+        return df
     def get_nodes(self):
         return nx.nodes(self.graph)
     def get_neighbours(self,node):
