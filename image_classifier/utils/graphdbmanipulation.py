@@ -117,6 +117,13 @@ class ImagesGraphDB:
                 if float(self.get_attribute_value_node(node,'distance_km'))>=distance:
                     images.append(node)
         return images
+    def get_nodes_filtered_by_type(self,type_of_node):
+        nodes_filtered = []
+        nodes = nx.nodes(self.graph)
+        for node in nodes:
+            if self.get_attribute_value_node(node, 'type') == type_of_node:
+                nodes_filtered.append(node)
+        return nodes_filtered
     def get_neighbours_by_type_of_node_list(self,node_list,node_type,neighbour_type):
         df = pd.DataFrame()
         neighbours_list_filtered = []
