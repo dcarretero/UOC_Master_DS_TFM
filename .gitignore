@@ -1,5 +1,4 @@
 image_classifier/runs
-image_classifier/models
 image_classifier/.idea
 image_classifier/.ipynb_checkpoints
 image_classifier/resources/images
